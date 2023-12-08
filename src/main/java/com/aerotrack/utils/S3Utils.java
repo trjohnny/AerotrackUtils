@@ -15,15 +15,18 @@ import java.nio.charset.StandardCharsets;
 public class S3Utils {
     public static JSONObject getJsonObjectFromS3(S3Client s3Client, String bucketName, String objectKey) throws IOException {
 
+        return new JSONObject(getStringFromS3(s3Client, bucketName, objectKey));
+    }
+
+    public static String getStringFromS3(S3Client s3Client, String bucketName, String objectKey) throws IOException {
+
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
                 .build();
 
         ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
-        String stringObject = new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
-
-        return new JSONObject(stringObject);
+        return new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
     }
 
     public static void putJsonObjectToS3(S3Client s3Client, String bucketName, String objectKey, JSONObject object) {
