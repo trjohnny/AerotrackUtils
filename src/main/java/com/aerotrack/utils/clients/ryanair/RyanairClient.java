@@ -1,7 +1,11 @@
-package com.aerotrack.utils.Api;
+package com.aerotrack.utils.clients.ryanair;
 
 import com.aerotrack.model.Flight;
+import lombok.AllArgsConstructor;
 import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,19 +15,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Ryanair {
+@AllArgsConstructor
+public class RyanairClient {
+    OkHttpClient httpClient;
+    public static RyanairClient create() {
+        return new RyanairClient(new OkHttpClient());
+    }
 
     private static final String RYANAIR_AVAILABILITY_API = "https://www.ryanair.com/api/booking/v4/it-it/availability?ADT=1&Origin=%s" +
             "&Destination=%s&IncludeConnectingFlights=false&Disc=0&DateOut=%s&RoundTrip=false&ToUs=AGREED";
 
 
-    public static List<Flight> getFlights(String fromAirportCode, String toAirportCode, LocalDate date) throws IOException {
+    public List<Flight> getFlights(String fromAirportCode, String toAirportCode, LocalDate date) throws IOException {
         String ryanairURL = String.format(RYANAIR_AVAILABILITY_API, fromAirportCode, toAirportCode, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-        String jsonResponse = HttpUtils.HttpGetRequest(ryanairURL, getDefaultHeaders());
-
         List<Flight> flights = new ArrayList<>();
-        JSONObject flightDetails = new JSONObject(jsonResponse);
+        JSONObject flightDetails = new JSONObject(getHttpResponse(ryanairURL));
 
         JSONArray trips = flightDetails.optJSONArray("trips");
         if (trips == null || trips.isEmpty()) {
@@ -64,4 +71,16 @@ public class Ryanair {
                 .build();
     }
 
+    private String getHttpResponse(String ryanairURL) throws IOException{
+        Request request = new Request.Builder()
+                .url(ryanairURL)
+                .headers(getDefaultHeaders())
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null)
+                throw new IOException("Unexpected response: " + response);
+            return response.body().string();
+        }
+    }
 }

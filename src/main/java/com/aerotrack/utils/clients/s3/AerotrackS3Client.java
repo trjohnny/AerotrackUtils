@@ -1,5 +1,6 @@
-package com.aerotrack.utils;
+package com.aerotrack.utils.clients.s3;
 
+import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -11,25 +12,31 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-// This will be soon placed in another dependency
-public class S3Utils {
-    public static JSONObject getJsonObjectFromS3(S3Client s3Client, String bucketName, String objectKey) throws IOException {
+import static com.aerotrack.utils.Constants.AIRPORTS_BUCKET_ENV_VAR;
 
-        return new JSONObject(getStringFromS3(s3Client, bucketName, objectKey));
+@AllArgsConstructor
+public class AerotrackS3Client {
+    S3Client s3Client;
+    public static AerotrackS3Client create() {
+        return new AerotrackS3Client(S3Client.create());
     }
-
-    public static String getStringFromS3(S3Client s3Client, String bucketName, String objectKey) throws IOException {
+    public String getStringObjectFromS3(String objectKey) throws IOException {
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
+                .bucket(System.getenv(AIRPORTS_BUCKET_ENV_VAR))
                 .key(objectKey)
                 .build();
 
         ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest);
+
         return new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    public static void putJsonObjectToS3(S3Client s3Client, String bucketName, String objectKey, JSONObject object) {
+    public JSONObject getJsonObjectFromS3(String objectKey) throws IOException {
+        return new JSONObject(getStringObjectFromS3(objectKey));
+    }
+
+    public void putJsonObjectToS3(S3Client s3Client, String bucketName, String objectKey, JSONObject object) {
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
