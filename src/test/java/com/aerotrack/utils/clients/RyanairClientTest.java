@@ -36,7 +36,7 @@ class RyanairClientTest {
     void getFlights_Success() throws Exception {
         String jsonResponse = // Your JSON mock response
                 "{\"trips\":[{\"dates\":[{\"flights\":[{\"timeUTC\":[\"2023-01-01T10:00:00\",\"2023-01-01T12:00:00\"], \"regularFare\":{\"fares\":[{\"amount\":100.0}]}, \"flightNumber\":\"FR123\"}]}]}]}";
-        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
+        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
 
         List<Flight> flights = ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1));
@@ -51,7 +51,7 @@ class RyanairClientTest {
 
     @Test
     void getFlights_Failure() throws Exception {
-        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
+        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
