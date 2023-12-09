@@ -6,52 +6,60 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class RyanairClientTest {
+
     @Mock
-    private ApiClientWrapper mockApiClientWrapper;
+    private RyanairClient.RyanairApiService mockApiService;
+
+    @Mock
+    private Call<String> mockCall;
+
     private RyanairClient ryanairClient;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ryanairClient = new RyanairClient(mockApiClientWrapper);
+        ryanairClient = new RyanairClient(mockApiService);
     }
 
     @Test
-    void getFlights_Success() {
-        String mockResponse = "{ \"trips\": [{ \"dates\": [{ \"flights\": [" +
-                "{\"timeUTC\": [\"2023-01-01T12:00:00\", \"2023-01-01T15:00:00\"], " +
-                "\"regularFare\": {\"fares\": [{\"amount\": 100.0}]}, " +
-                "\"flightNumber\": \"FR123\"}]}]}]}";
-        when(mockApiClientWrapper.sendGetRequest(anyString(), eq(Optional.empty()), eq(String.class)))
-                .thenReturn(mockResponse);
+    void getFlights_Success() throws Exception {
+        String jsonResponse = // Your JSON mock response
+                "{\"trips\":[{\"dates\":[{\"flights\":[{\"timeUTC\":[\"2023-01-01T10:00:00\",\"2023-01-01T12:00:00\"], \"regularFare\":{\"fares\":[{\"amount\":100.0}]}, \"flightNumber\":\"FR123\"}]}]}]}";
+        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
+        when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
 
-        List<Flight> result = ryanairClient.getFlights("LAX", "JFK", LocalDate.of(2023, 1, 1));
+        List<Flight> flights = ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1));
 
-        assertNotNull(result);
-        assertEquals(1, result.size()); // Assuming 1 mock Flight was returned
-        Flight flight = result.get(0);
-        assertEquals("FR123", flight.getFlightNumber());
-        assertEquals(100.0, flight.getPrice());
+        assertNotNull(flights);
+        assertFalse(flights.isEmpty());
+
+        Flight firstFlight = flights.get(0);
+        assertEquals("FR123", firstFlight.getFlightNumber());
+        assertEquals(100.0, firstFlight.getPrice()); // Assuming the price is 100.0 as per the mock response
     }
 
     @Test
-    void getFlights_NoFlightsAvailable() {
-        String mockResponse = "{ \"trips\": [] }"; // Simulate a response with no flights
-        when(mockApiClientWrapper.sendGetRequest(anyString(), eq(Optional.empty()), eq(String.class)))
-                .thenReturn(mockResponse);
+    void getFlights_Failure() throws Exception {
+        when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
+        when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
-        List<Flight> result = ryanairClient.getFlights("LAX", "JFK", LocalDate.of(2023, 1, 1));
+        Exception exception = assertThrows(RuntimeException.class, () ->
+                ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1))
+        );
 
-        assertTrue(result.isEmpty());
+        String expectedMessage = "Caught exception while calling Ryanair API.";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 }
