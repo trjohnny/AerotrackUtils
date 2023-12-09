@@ -1,10 +1,7 @@
 package com.aerotrack.utils.clients.dynamodb;
 
-import com.aerotrack.model.Flight;
-import com.aerotrack.model.TableObject;
+import com.aerotrack.model.entities.Flight;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
