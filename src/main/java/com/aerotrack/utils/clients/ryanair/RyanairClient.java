@@ -1,37 +1,53 @@
 package com.aerotrack.utils.clients.ryanair;
 
 import com.aerotrack.model.entities.Flight;
-import com.aerotrack.model.exceptions.ApiRequestException;
-import com.aerotrack.utils.clients.ApiClientWrapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
 public class RyanairClient {
-    private final ApiClientWrapper apiClientWrapper;
+
+    private final RyanairApiService ryanairApiService;
 
     public static RyanairClient create() {
-        return new RyanairClient(new ApiClientWrapper());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://www.ryanair.com/api/booking/v4/it-it/")
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+
+        return new RyanairClient(retrofit.create(RyanairApiService.class));
     }
 
-    private static final String RYANAIR_AVAILABILITY_API = "https://www.ryanair.com/api/booking/v4/it-it/availability?ADT=1&Origin=%s" +
-            "&Destination=%s&IncludeConnectingFlights=false&Disc=0&DateOut=%s&RoundTrip=false&ToUs=AGREED";
-
     public List<Flight> getFlights(String fromAirportCode, String toAirportCode, LocalDate date) {
-        String ryanairURL = String.format(RYANAIR_AVAILABILITY_API, fromAirportCode, toAirportCode, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        try {
+            String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String response = ryanairApiService.getFlights("1", fromAirportCode, toAirportCode, "false", "0", formattedDate, "false", "AGREED")
+                    .execute()
+                    .body();
+            return parseFlights(response, fromAirportCode, toAirportCode); // Parse the JSON string
+        } catch (Exception e) {
+            log.error("Error in calling Ryanair API: " + e.getMessage());
+            throw new RuntimeException("Caught exception while calling Ryanair API.", e);
+        }
+    }
 
+    private List<Flight> parseFlights(String jsonResponse, String fromAirportCode, String toAirportCode) {
         List<Flight> flights = new ArrayList<>();
         try {
-            JSONObject flightDetails = new JSONObject(apiClientWrapper.sendGetRequest(ryanairURL, Optional.empty(), String.class));
+            JSONObject flightDetails = new JSONObject(jsonResponse);
 
             JSONArray trips = flightDetails.optJSONArray("trips");
             if (trips == null || trips.isEmpty()) {
@@ -66,5 +82,19 @@ public class RyanairClient {
         }
 
         return flights;
+    }
+
+    public interface RyanairApiService {
+        @GET("availability")
+        retrofit2.Call<String> getFlights(
+                @Query("ADT") String adultCount,
+                @Query("Origin") String fromAirportCode,
+                @Query("Destination") String toAirportCode,
+                @Query("IncludeConnectingFlights") String includeConnectingFlights,
+                @Query("Disc") String discount,
+                @Query("DateOut") String dateOut,
+                @Query("RoundTrip") String roundTrip,
+                @Query("ToUs") String termsOfUse
+        );
     }
 }
