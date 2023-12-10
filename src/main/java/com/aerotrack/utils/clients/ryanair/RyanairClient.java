@@ -54,16 +54,18 @@ public class RyanairClient {
                     .execute();
 
             if (!response.isSuccessful()) {
+                log.error("Unsuccessful response from Ryanair API: {}", response);
                 throw new HttpException(response);
             }
 
             String responseBody = response.body();
             if (responseBody == null) {
+                log.error("Null response from Ryanair API.");
                 throw new HttpException(response);
             }
 
             return parseFlights(responseBody, fromAirportCode, toAirportCode); // Parse the JSON string
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException e) {
             log.error("Error in calling Ryanair API: " + e.getMessage());
             throw new RuntimeException("Caught exception while calling Ryanair API.", e);
         }
