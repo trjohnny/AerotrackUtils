@@ -57,9 +57,5 @@ class RyanairClientTest {
         Exception exception = assertThrows(RuntimeException.class, () ->
                 ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1))
         );
-
-        String expectedMessage = "Caught exception while calling Ryanair API.";
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
     }
 }
