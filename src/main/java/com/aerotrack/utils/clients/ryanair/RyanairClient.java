@@ -54,7 +54,7 @@ public class RyanairClient {
             }
 
             return parseAirportConnections(responseBody);
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException  e) {
             log.error("Error in calling Ryanair API for airport connections: " + e.getMessage());
             throw new RuntimeException("Caught exception while getting airport connections.", e);
         }
@@ -94,7 +94,7 @@ public class RyanairClient {
             }
 
             return parseAvailableAirports(responseBody);
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException  e) {
             log.error("Error in calling Ryanair API for available airports: " + e.getMessage());
             throw new RuntimeException("Caught exception while getting available airports.", e);
         }
