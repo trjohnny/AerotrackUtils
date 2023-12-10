@@ -36,10 +36,10 @@ public class AerotrackS3Client {
         return new JSONObject(getStringObjectFromS3(objectKey));
     }
 
-    public void putJsonObjectToS3(S3Client s3Client, String bucketName, String objectKey, JSONObject object) {
+    public void putJsonObjectToS3(String objectKey, JSONObject object) {
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
+                .bucket(System.getenv(AIRPORTS_BUCKET_ENV_VAR))
                 .key(objectKey)
                 .build();
 
