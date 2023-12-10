@@ -19,8 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class AerotrackApiClient {
 
-    private static final String BASE_URL = "https://f1muce19kh.execute-api.eu-west-1.amazonaws.com/prod/";
-    private static final String API_KEY = "z9inDLaWtOamHqvOCl25w33KtSbqVpOf61oPHGhK";
+    private static final String BASE_URL = "https://u4ck1qvmfe.execute-api.eu-west-1.amazonaws.com/prod/";
+    private static final String API_KEY = "ySPfILwuHkgUiE36bYHH235s9AgFrGg7huBDcXo1";
 
     private final ApiGatewayService apiGatewayService;
 
