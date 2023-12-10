@@ -66,8 +66,8 @@ public class RyanairClient {
 
             return parseFlights(responseBody, fromAirportCode, toAirportCode); // Parse the JSON string
         } catch (IOException e) {
-            log.error("Error in calling Ryanair API: " + e.getMessage());
-            throw new RuntimeException("Caught exception while calling Ryanair API.", e);
+            log.error("IOException caught while calling Ryanair API: " + e.getMessage());
+            throw new RuntimeException("IOException caught while calling Ryanair API.", e);
         }
     }
 
