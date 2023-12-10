@@ -66,7 +66,7 @@ class AerotrackS3ClientTest {
         jsonObject.put("key", "value");
         when(mockS3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(PutObjectResponse.builder().build());
 
-        aerotrackS3Client.putJsonObjectToS3(mockS3Client, "bucket-name", "object-key", jsonObject);
+        aerotrackS3Client.putJsonObjectToS3( "object-key", jsonObject);
 
         verify(mockS3Client, times(1)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
     }
