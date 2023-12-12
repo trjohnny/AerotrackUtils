@@ -35,13 +35,13 @@ class AerotrackDynamoDbClientTest {
 
     @Test
     void scanFlightsBetweenDates_Success() {
-        Flight flight = new Flight("VCE", "DUB", "2021-01-01", "2021-01-02", "FR830", 50);
+        Flight flight = new Flight("VCE", "DUB", "2021-01-01T00:00:00.000Z", "2021-01-02T00:00:00.000Z", "FR830", 50);
 
         when(mockFlightTable.query(any(QueryConditional.class))).thenReturn(mockPageIterable);
         when(mockPageIterable.items()).thenReturn(mockSdkIterable);
         when(mockSdkIterable.stream()).thenReturn(Stream.of(flight));
 
-        List<Flight> result = aerotrackDynamoDbClient.scanFlightsBetweenDates("LAX", "JFK", "2023-01-01", "2023-01-10");
+        List<Flight> result = aerotrackDynamoDbClient.scanFlightsBetweenDates("LAX", "JFK", "2023-01-01T00:00:00.000Z", "2023-01-10T00:00:00.000Z");
 
         assertEquals(1, result.size());
         assertEquals(result.get(0), flight);

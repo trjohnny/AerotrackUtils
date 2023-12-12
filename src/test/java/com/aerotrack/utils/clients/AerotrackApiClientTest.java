@@ -1,7 +1,7 @@
 package com.aerotrack.utils.clients;
 
 import com.aerotrack.model.entities.Flight;
-import com.aerotrack.model.entities.FlightPair;
+import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.protocol.ScanQueryRequest;
 import com.aerotrack.model.protocol.ScanQueryResponse;
 import com.aerotrack.utils.clients.apigateway.AerotrackApiClient;
@@ -38,21 +38,21 @@ class AerotrackApiClientTest {
 
     @Test
     void getBestFlight_Success() throws IOException {
-        Flight outboundFlight = new Flight("VCE", "DUB", "2023-01-01T08:00:00", "2023-01-01T10:00:00", "OB123", 150.0);
-        Flight returnFlight = new Flight("DUB", "VCE", "2023-01-10T18:00:00", "2023-01-10T20:00:00", "RT456", 200.0);
-        FlightPair flightPair = new FlightPair(outboundFlight, returnFlight, 350);
+        Flight outboundFlight = new Flight("VCE", "DUB", "2023-01-01T08:00:00.000Z", "2023-01-01T10:00:00.000Z", "OB123", 150.0);
+        Flight returnFlight = new Flight("DUB", "VCE", "2023-01-10T18:00:00.000Z", "2023-01-10T20:00:00.000Z", "RT456", 200.0);
+        Trip flightPair = new Trip(List.of(outboundFlight), List.of(returnFlight), 350);
 
         ScanQueryResponse scanQueryResponse = new ScanQueryResponse(List.of(flightPair));
 
         when(mockApiGatewayService.sendScanQueryRequest(anyString(), any(ScanQueryRequest.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(scanQueryResponse));
 
-        List<FlightPair> result = aerotrackApiClient.getBestFlight(new ScanQueryRequest());
+        List<Trip> result = aerotrackApiClient.getBestFlight(new ScanQueryRequest());
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("OB123", result.get(0).getOutboundFlight().getFlightNumber());
-        assertEquals("RT456", result.get(0).getReturnFlight().getFlightNumber());
+        assertEquals("OB123", result.get(0).getOutboundFlights().get(0).getFlightNumber());
+        assertEquals("RT456", result.get(0).getReturnFlights().get(0).getFlightNumber());
         assertEquals(350, result.get(0).getTotalPrice());
     }
 

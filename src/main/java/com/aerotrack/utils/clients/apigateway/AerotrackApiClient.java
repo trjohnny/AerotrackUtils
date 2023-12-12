@@ -1,6 +1,6 @@
 package com.aerotrack.utils.clients.apigateway;
 
-import com.aerotrack.model.entities.FlightPair;
+import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.exceptions.AerotrackClientException;
 import com.aerotrack.model.protocol.ScanQueryRequest;
 import com.aerotrack.model.protocol.ScanQueryResponse;
@@ -33,11 +33,11 @@ public class AerotrackApiClient {
         return new AerotrackApiClient(retrofit.create(ApiGatewayService.class));
     }
 
-    public List<FlightPair> getBestFlight(ScanQueryRequest scanQueryRequest) {
+    public List<Trip> getBestFlight(ScanQueryRequest scanQueryRequest) {
         try {
             ScanQueryResponse response = apiGatewayService.sendScanQueryRequest(API_KEY, scanQueryRequest).execute().body();
             if (response != null) {
-                return response.getFlightPairs();
+                return response.getTrips();
             }
         } catch (IOException e) {
             log.error("Error in API request: " + e.getMessage());

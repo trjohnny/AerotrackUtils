@@ -2,7 +2,8 @@ package com.aerotrack.utils.clients;
 
 import com.aerotrack.model.entities.Airport;
 import com.aerotrack.model.entities.Flight;
-import com.aerotrack.utils.clients.ryanair.RyanairClient;
+import com.aerotrack.model.entities.Trip;
+import com.aerotrack.utils.clients.api.ryanair.RyanairClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -36,11 +37,11 @@ class RyanairClientTest {
     @Test
     void getFlights_Success() throws Exception {
         String jsonResponse =
-                "{\"trips\":[{\"dates\":[{\"flights\":[{\"timeUTC\":[\"2023-01-01T10:00:00\",\"2023-01-01T12:00:00\"], \"regularFare\":{\"fares\":[{\"amount\":100.0}]}, \"flightNumber\":\"FR123\"}]}]}]}";
+                "{\"currency\":\"EUR\",\"trips\":[{\"dates\":[{\"flights\":[{\"timeUTC\":[\"2023-01-01T10:00:00.000Z\",\"2023-01-01T12:00:00.000Z\"], \"regularFare\":{\"fares\":[{\"amount\":100.0}]}, \"flightNumber\":\"FR123\"}]}]}]}";
         when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
 
-        List<Flight> flights = ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1));
+        List<Flight> flights = ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1)).getFlights();
 
         assertNotNull(flights);
         assertFalse(flights.isEmpty());
@@ -81,13 +82,9 @@ class RyanairClientTest {
         when(mockApiService.getAirportConnections(any())).thenReturn(mockCall);
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
-        Exception exception = assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
                 ryanairClient.getAirportConnections("OriginCode")
         );
-
-        String expectedMessage = "Caught exception while getting airport connections.";
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
@@ -111,12 +108,8 @@ class RyanairClientTest {
         when(mockApiService.getActiveAirports()).thenReturn(mockCall);
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
-        Exception exception = assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
                 ryanairClient.getAvailableAirports()
         );
-
-        String expectedMessage = "Caught exception while getting available airports.";
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
     }
 }

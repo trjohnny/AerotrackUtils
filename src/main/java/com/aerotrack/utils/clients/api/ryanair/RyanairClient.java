@@ -1,7 +1,9 @@
-package com.aerotrack.utils.clients.ryanair;
+package com.aerotrack.utils.clients.api.ryanair;
 
 import com.aerotrack.model.entities.Airport;
 import com.aerotrack.model.entities.Flight;
+import com.aerotrack.model.entities.FlightList;
+import com.aerotrack.utils.clients.api.currencyConverter.CurrencyConverter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -12,7 +14,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -129,7 +130,7 @@ public class RyanairClient {
         return availableAirports;
     }
 
-    public List<Flight> getFlights(String fromAirportCode, String toAirportCode, LocalDate date) {
+    public FlightList getFlights(String fromAirportCode, String toAirportCode, LocalDate date) {
         try {
 
             Response<String> response = ryanairApiService.getFlights(
@@ -161,25 +162,30 @@ public class RyanairClient {
     }
 
 
-    private List<Flight> parseFlights(String jsonResponse, String fromAirportCode, String toAirportCode) {
+    private FlightList parseFlights(String jsonResponse, String fromAirportCode, String toAirportCode) {
+        FlightList result = new FlightList(new ArrayList<Flight>(), "EUR");
         List<Flight> flights = new ArrayList<>();
+        String currency = "";
+
         try {
             JSONObject flightDetails = new JSONObject(jsonResponse);
 
             JSONArray trips = flightDetails.optJSONArray("trips");
-            if (trips == null || trips.isEmpty()) {
-                return flights;
+            currency = flightDetails.getString("currency");
+            if (trips == null || trips.isEmpty() || currency == null) {
+                return result;
             }
 
             JSONArray dates = trips.getJSONObject(0).optJSONArray("dates");
             if (dates == null || dates.isEmpty()) {
-                return flights;
+                return result;
             }
 
             JSONArray flightsArray = dates.getJSONObject(0).optJSONArray("flights");
             if (flightsArray == null || flightsArray.isEmpty()) {
-                return flights;
+                return result;
             }
+
 
             for (int i = 0; i < flightsArray.length(); i++) {
                 JSONObject flight = flightsArray.getJSONObject(i);
@@ -198,7 +204,9 @@ public class RyanairClient {
             throw new RuntimeException("Caught exception while calling Ryanair API.", e);
         }
 
-        return flights;
+        result.setFlights(flights);
+        result.setCurrency(currency.toLowerCase());
+        return result;
     }
 
     public interface RyanairApiService {
