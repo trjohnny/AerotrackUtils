@@ -2,8 +2,7 @@ package com.aerotrack.utils.clients;
 
 import com.aerotrack.model.entities.Airport;
 import com.aerotrack.model.entities.Flight;
-import com.aerotrack.model.entities.Trip;
-import com.aerotrack.utils.clients.api.ryanair.RyanairClient;
+import com.aerotrack.utils.clients.api.RyanairApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -18,20 +17,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-class RyanairClientTest {
+class RyanairApiClientTest {
 
     @Mock
-    private RyanairClient.RyanairApiService mockApiService;
+    private RyanairApiClient.RyanairApiService mockApiService;
 
     @Mock
     private Call<String> mockCall;
 
-    private RyanairClient ryanairClient;
+    private RyanairApiClient ryanairApiClient;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ryanairClient = new RyanairClient(mockApiService);
+        ryanairApiClient = new RyanairApiClient(mockApiService);
     }
 
     @Test
@@ -41,7 +40,7 @@ class RyanairClientTest {
         when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
 
-        List<Flight> flights = ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1)).getFlights();
+        List<Flight> flights = ryanairApiClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1)).getFlights();
 
         assertNotNull(flights);
         assertFalse(flights.isEmpty());
@@ -57,7 +56,7 @@ class RyanairClientTest {
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                ryanairClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1))
+                ryanairApiClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1))
         );
     }
 
@@ -68,7 +67,7 @@ class RyanairClientTest {
         when(mockApiService.getAirportConnections(any())).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
 
-        List<String> connections = ryanairClient.getAirportConnections("OriginCode");
+        List<String> connections = ryanairApiClient.getAirportConnections("OriginCode");
 
         assertNotNull(connections);
         assertFalse(connections.isEmpty());
@@ -83,7 +82,7 @@ class RyanairClientTest {
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
         assertThrows(RuntimeException.class, () ->
-                ryanairClient.getAirportConnections("OriginCode")
+                ryanairApiClient.getAirportConnections("OriginCode")
         );
     }
 
@@ -92,7 +91,7 @@ class RyanairClientTest {
         String jsonResponse = "[{\"code\":\"AAA\",\"name\":\"Airport A\",\"country\":{\"code\":\"C1\"}}, {\"code\":\"BBB\",\"name\":\"Airport B\",\"country\":{\"code\":\"C2\"}}]";
         when(mockApiService.getActiveAirports()).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(Response.success(jsonResponse));
-        List<Airport> airports = ryanairClient.getAvailableAirports();
+        List<Airport> airports = ryanairApiClient.getAvailableAirports();
 
         assertNotNull(airports);
         assertFalse(airports.isEmpty());
@@ -109,7 +108,7 @@ class RyanairClientTest {
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
         assertThrows(RuntimeException.class, () ->
-                ryanairClient.getAvailableAirports()
+                ryanairApiClient.getAvailableAirports()
         );
     }
 }

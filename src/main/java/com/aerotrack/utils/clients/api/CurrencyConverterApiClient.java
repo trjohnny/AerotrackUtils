@@ -1,4 +1,4 @@
-package com.aerotrack.utils.clients.api.currencyConverter;
+package com.aerotrack.utils.clients.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -9,20 +9,20 @@ import retrofit2.http.GET;
 import java.io.IOException;
 
 @Slf4j
-public class CurrencyConverter {
+public class CurrencyConverterApiClient {
 
     private final CurrencyApiService currencyApiService;
 
-    public static CurrencyConverter create() {
+    public static CurrencyConverterApiClient create() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/")
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
 
-        return new CurrencyConverter(retrofit.create(CurrencyApiService.class));
+        return new CurrencyConverterApiClient(retrofit.create(CurrencyApiService.class));
     }
 
-    public CurrencyConverter(CurrencyApiService currencyApiService) {
+    public CurrencyConverterApiClient(CurrencyApiService currencyApiService) {
         this.currencyApiService = currencyApiService;
     }
 

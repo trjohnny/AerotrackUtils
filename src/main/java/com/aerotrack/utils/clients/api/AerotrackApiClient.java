@@ -1,5 +1,6 @@
-package com.aerotrack.utils.clients.apigateway;
+package com.aerotrack.utils.clients.api;
 
+import com.aerotrack.model.entities.AerotrackStage;
 import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.exceptions.AerotrackClientException;
 import com.aerotrack.model.protocol.ScanQueryRequest;
@@ -19,23 +20,25 @@ import java.util.List;
 @AllArgsConstructor
 public class AerotrackApiClient {
 
-    private static final String BASE_URL = "https://u4ck1qvmfe.execute-api.eu-west-1.amazonaws.com/prod/";
-    private static final String API_KEY = "ySPfILwuHkgUiE36bYHH235s9AgFrGg7huBDcXo1";
+    private final AerotrackStage stage;
 
     private final ApiGatewayService apiGatewayService;
 
-    public static AerotrackApiClient create() {
+    public static AerotrackApiClient create(AerotrackStage stage) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(stage.getApiEndpoint().baseUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
-        return new AerotrackApiClient(retrofit.create(ApiGatewayService.class));
+        return new AerotrackApiClient(stage, retrofit.create(ApiGatewayService.class));
     }
 
     public List<Trip> getBestFlight(ScanQueryRequest scanQueryRequest) {
         try {
-            ScanQueryResponse response = apiGatewayService.sendScanQueryRequest(API_KEY, scanQueryRequest).execute().body();
+            ScanQueryResponse response = apiGatewayService.sendScanQueryRequest(stage.getApiEndpoint().apiKey(), scanQueryRequest)
+                    .execute()
+                    .body();
+
             if (response != null) {
                 return response.getTrips();
             }

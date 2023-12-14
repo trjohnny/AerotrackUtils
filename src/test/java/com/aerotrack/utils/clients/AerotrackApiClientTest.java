@@ -1,10 +1,11 @@
 package com.aerotrack.utils.clients;
 
+import com.aerotrack.model.entities.AerotrackStage;
 import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.protocol.ScanQueryRequest;
 import com.aerotrack.model.protocol.ScanQueryResponse;
-import com.aerotrack.utils.clients.apigateway.AerotrackApiClient;
+import com.aerotrack.utils.clients.api.AerotrackApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -13,7 +14,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +33,7 @@ class AerotrackApiClientTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        aerotrackApiClient = new AerotrackApiClient(mockApiGatewayService);
+        aerotrackApiClient = new AerotrackApiClient(AerotrackStage.ALPHA, mockApiGatewayService);
     }
 
     @Test

@@ -1,9 +1,8 @@
-package com.aerotrack.utils.clients.api.ryanair;
+package com.aerotrack.utils.clients.api;
 
 import com.aerotrack.model.entities.Airport;
 import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.FlightList;
-import com.aerotrack.utils.clients.api.currencyConverter.CurrencyConverter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -26,16 +25,16 @@ import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
-public class RyanairClient {
+public class RyanairApiClient {
 
     private final RyanairApiService ryanairApiService;
-    public static RyanairClient create() {
+    public static RyanairApiClient create() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.ryanair.com/api/")
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
 
-        return new RyanairClient(retrofit.create(RyanairApiService.class));
+        return new RyanairApiClient(retrofit.create(RyanairApiService.class));
     }
 
     public List<String> getAirportConnections(String airportCode) {
