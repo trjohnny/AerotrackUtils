@@ -1,6 +1,8 @@
 package com.aerotrack.utils.clients;
 
 import com.aerotrack.model.entities.AerotrackStage;
+import com.aerotrack.model.entities.Airport;
+import com.aerotrack.model.entities.AirportsJsonFile;
 import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.protocol.ScanQueryRequest;
@@ -27,6 +29,8 @@ class AerotrackApiClientTest {
 
     @Mock
     private Call<ScanQueryResponse> mockCall;
+    @Mock
+    private Call<AirportsJsonFile> mockJsonCall;
 
     private AerotrackApiClient aerotrackApiClient;
 
@@ -70,5 +74,21 @@ class AerotrackApiClientTest {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    // Additional test cases can be added to cover different scenarios
+    @Test
+    void getAirportsJson_Success() throws IOException {
+        Airport venice = new Airport("VCE","Venice Marco Polo","IT",List.of("AHO","BRI","BER","CGN","DUB","HEL"),"2023-12-10T00:00:00.000Z");
+        Airport vienna = new Airport("VIE", "Vienna", "AT", List.of("VCE","TSF","BRI"),"2023-12-10T00:00:00.000Z");
+        Airport praga = new Airport("PRG","Praga","CK",List.of("TSF"),"2023-12-10T00:00:00.000");
+        List<Airport> testAirports = List.of(venice, vienna, praga);
+
+        AirportsJsonFile airportsJsonFile = new AirportsJsonFile(testAirports);
+
+        when(mockApiGatewayService.sendAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
+        when(mockJsonCall.execute()).thenReturn(Response.success(airportsJsonFile));
+
+        AirportsJsonFile result = aerotrackApiClient.getAirportsJson();
+
+        assertEquals(result, airportsJsonFile);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.aerotrack.utils.clients.api;
 
 import com.aerotrack.model.entities.AerotrackStage;
+import com.aerotrack.model.entities.AirportsJsonFile;
 import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.exceptions.AerotrackClientException;
 import com.aerotrack.model.protocol.ScanQueryRequest;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 
@@ -49,7 +51,25 @@ public class AerotrackApiClient {
         throw new RuntimeException("Response is null");
     }
 
+    public AirportsJsonFile getAirportsJson(){
+        try {
+            AirportsJsonFile response = apiGatewayService.sendAirportsJSONRequest(stage.getApiEndpoint().apiKey())
+                    .execute()
+                    .body();
+
+            if (response != null){
+                return response;
+            }
+        } catch (IOException e) {
+            log.error("Error in API request: " + e.getMessage());
+            throw new AerotrackClientException("Error in API request: ", e);
+        }
+        throw new RuntimeException("Response is null");
+    }
+
     public interface ApiGatewayService {
+        @GET("airports")
+        retrofit2.Call<AirportsJsonFile> sendAirportsJSONRequest(@Header("x-api-key") String apiKey);
         @POST("scan")
         retrofit2.Call<ScanQueryResponse> sendScanQueryRequest(@Header("x-api-key") String apiKey, @Body ScanQueryRequest request);
     }
