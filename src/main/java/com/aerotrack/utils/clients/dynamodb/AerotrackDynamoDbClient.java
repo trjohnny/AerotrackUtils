@@ -1,6 +1,7 @@
 package com.aerotrack.utils.clients.dynamodb;
 
 import com.aerotrack.model.entities.Flight;
+import com.aerotrack.common.Constants;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -10,15 +11,13 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.List;
 
-import static com.aerotrack.utils.Constants.FLIGHT_TABLE_ENV_VAR;
-
 @AllArgsConstructor
 public class AerotrackDynamoDbClient {
     private static final TableSchema<Flight> FLIGHT_TABLE_SCHEMA = TableSchema.fromClass(Flight.class);
     private final DynamoDbTable<Flight> flightTable;
     public static AerotrackDynamoDbClient create() {
         return new AerotrackDynamoDbClient(DynamoDbEnhancedClient.create().table(
-                System.getenv(FLIGHT_TABLE_ENV_VAR), FLIGHT_TABLE_SCHEMA));
+                System.getenv(Constants.FLIGHT_TABLE_ENV_VAR), FLIGHT_TABLE_SCHEMA));
     }
 
     public List<Flight> scanFlightsBetweenDates(String departure, String destination, String availabilityStart, String availabilityEnd) {
@@ -32,7 +31,6 @@ public class AerotrackDynamoDbClient {
                 .toList();
     }
 
-    // TODO: move to public static utils class
     private String getDirection(String departure, String destination) {
         return departure + "-" + destination;
     }

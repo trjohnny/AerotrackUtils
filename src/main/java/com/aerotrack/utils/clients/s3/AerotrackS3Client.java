@@ -1,5 +1,6 @@
 package com.aerotrack.utils.clients.s3;
 
+import com.aerotrack.common.Constants;
 import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -12,8 +13,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static com.aerotrack.utils.Constants.AIRPORTS_BUCKET_ENV_VAR;
-
 @AllArgsConstructor
 public class AerotrackS3Client {
     S3Client s3Client;
@@ -23,7 +22,7 @@ public class AerotrackS3Client {
     public String getStringObjectFromS3(String objectKey) throws IOException {
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(System.getenv(AIRPORTS_BUCKET_ENV_VAR))
+                .bucket(System.getenv(Constants.AIRPORTS_BUCKET_ENV_VAR))
                 .key(objectKey)
                 .build();
 
@@ -39,7 +38,7 @@ public class AerotrackS3Client {
     public void putJsonObjectToS3(String objectKey, JSONObject object) {
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(System.getenv(AIRPORTS_BUCKET_ENV_VAR))
+                .bucket(System.getenv(Constants.AIRPORTS_BUCKET_ENV_VAR))
                 .key(objectKey)
                 .build();
 
