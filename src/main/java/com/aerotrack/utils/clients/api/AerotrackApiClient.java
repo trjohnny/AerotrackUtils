@@ -8,6 +8,7 @@ import com.aerotrack.model.protocol.ScanQueryRequest;
 import com.aerotrack.model.protocol.ScanQueryResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.Body;
@@ -17,6 +18,7 @@ import retrofit2.http.POST;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @AllArgsConstructor
@@ -27,9 +29,17 @@ public class AerotrackApiClient {
     private final ApiGatewayService apiGatewayService;
 
     public static AerotrackApiClient create(AerotrackStage stage) {
+        // Configure OkHttpClient with custom timeouts
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS) // Set connection timeout
+                .readTimeout(30, TimeUnit.SECONDS)     // Set read timeout
+                .writeTimeout(30, TimeUnit.SECONDS)    // Set write timeout
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(stage.getApiEndpoint().baseUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
+                .client(okHttpClient)
                 .build();
 
         return new AerotrackApiClient(stage, retrofit.create(ApiGatewayService.class));
