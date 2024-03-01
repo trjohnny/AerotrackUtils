@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import retrofit2.Response;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
@@ -123,7 +125,7 @@ public class WizzairApiClient implements AirlineApiClient{
             flights.add(flight);
         }
 
-        return new FlightList(flights, currency);
+        return new FlightList(flights, currency.isBlank() ? "eur" : currency);
     }
 
     public interface WizzAirApiService {
