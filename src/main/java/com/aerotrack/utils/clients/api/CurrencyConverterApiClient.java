@@ -2,6 +2,7 @@ package com.aerotrack.utils.clients.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
@@ -15,7 +16,7 @@ public class CurrencyConverterApiClient {
 
     public static CurrencyConverterApiClient create() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/")
+                .baseUrl("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/")
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
 
@@ -27,34 +28,40 @@ public class CurrencyConverterApiClient {
     }
 
     public double getConversionFactor(String currencyFrom, String currencyTo) {
-        if(currencyTo.equals(currencyFrom))
-            return 1.0;
+        if (currencyTo.equals(currencyFrom)) return 1.0;
+
         try {
-            String response = currencyApiService.getCurrencyRate(currencyFrom.toLowerCase(), currencyTo.toLowerCase()).execute().body();
-            if (response != null) {
-                JSONObject jsonResponse = new JSONObject(response);
-                double conversionRate = jsonResponse.optDouble(currencyTo.toLowerCase(), -1);
+            Response<String> response = currencyApiService.getCurrencyRate(currencyFrom.toLowerCase()).execute();
+
+            // Log full request URL
+            System.out.println("Requested URL: " + response.raw().request().url().toString());
+
+            if (response.isSuccessful() && response.body() != null) {
+
+                JSONObject jsonResponse = new JSONObject(response.body());
+                JSONObject conversions = jsonResponse.getJSONObject(currencyFrom);
+                double conversionRate = conversions.optDouble(currencyTo.toLowerCase(), -1);
+
                 if (conversionRate != -1) {
                     return conversionRate;
                 } else {
                     log.error("Conversion rate not found for currencies {} to {}", currencyFrom, currencyTo);
-                    throw new RuntimeException("Conversion rate not found for currencies");
+                    throw new RuntimeException("Conversion rate not found");
                 }
             } else {
-                log.error("Null response from currency API.");
-                throw new RuntimeException("Null response from currency API");
+                // Log error response
+                String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                System.out.println("Error response body: " + errorBody);
+                throw new RuntimeException("Unsuccessful response from currency API");
             }
         } catch (IOException e) {
             log.error("IOException caught while calling currency API: " + e.getMessage());
-            throw new RuntimeException("IOException caught while calling currency API", e);
+            throw new RuntimeException("IOException caught", e);
         }
     }
 
     public interface CurrencyApiService {
-        @GET("currencies/{from}/{to}.json")
-        retrofit2.Call<String> getCurrencyRate(
-                @retrofit2.http.Path("from") String from,
-                @retrofit2.http.Path("to") String to
-        );
+        @GET("v1/currencies/{from}.json")
+        retrofit2.Call<String> getCurrencyRate(@retrofit2.http.Path("from") String from);
     }
 }

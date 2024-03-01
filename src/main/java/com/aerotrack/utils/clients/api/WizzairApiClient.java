@@ -4,6 +4,7 @@ import com.aerotrack.model.entities.TimetableRequest;
 import com.aerotrack.model.entities.WizzAirFlight;
 import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.FlightList;
+import com.aerotrack.model.exceptions.DirectionNotAvailableException;
 import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -68,7 +69,20 @@ public class WizzairApiClient implements AirlineApiClient{
         try {
             Response<String> response = wizzAirApiService.getTimetable(timetableRequest).execute();
 
-            if (!response.isSuccessful()) {
+            if (!response.isSuccessful() && response.errorBody() != null) {
+                String errorBody = response.errorBody().string();
+                JSONObject json = new JSONObject(errorBody);
+                JSONArray validationCodes = json.getJSONArray("validationCodes");
+                String reason = validationCodes.getString(0);
+
+                if (! reason.equals("InvalidMarket")) {
+                    log.error("Error body: " + errorBody);
+                    throw new RuntimeException("Unsuccessful response from WizzAir API.");
+                }
+
+                log.warn("Departure/destination combination not found in wizzair back end.");
+                throw new DirectionNotAvailableException("Departure/destination combination not found in wizzair back end.");
+            } else if (!response.isSuccessful()) {
                 log.error("Unsuccessful response from WizzAir API: {}", response);
                 throw new RuntimeException("Unsuccessful response from WizzAir API.");
             }
@@ -96,7 +110,7 @@ public class WizzairApiClient implements AirlineApiClient{
             JSONObject flightJson = outboundFlights.getJSONObject(i);
             String departureDateTime = flightJson.getJSONArray("departureDates").getString(0);
             double price = flightJson.getJSONObject("price").getDouble("amount");
-            currency = flightJson.getJSONObject("price").getString("currencyCode");
+            currency = flightJson.getJSONObject("price").getString("currencyCode").toLowerCase();
 
             Flight flight = Flight.builder()
                     .direction(flightJson.getString("departureStation") + "-" + flightJson.getString("arrivalStation"))

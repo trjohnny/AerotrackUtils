@@ -163,7 +163,7 @@ public class RyanairApiClient implements AirlineApiClient{
 
 
     private FlightList parseFlights(String jsonResponse, String fromAirportCode, String toAirportCode) {
-        FlightList result = new FlightList(new ArrayList<>(), "EUR");
+        FlightList result = new FlightList(new ArrayList<>(), "eur");
         List<Flight> flights = new ArrayList<>();
         String currency;
 
@@ -171,8 +171,8 @@ public class RyanairApiClient implements AirlineApiClient{
             JSONObject flightDetails = new JSONObject(jsonResponse);
 
             JSONArray trips = flightDetails.optJSONArray("trips");
-            currency = flightDetails.getString("currency");
-            if (trips == null || trips.isEmpty() || currency == null) {
+            currency = flightDetails.getString("currency").toLowerCase();
+            if (trips == null || trips.isEmpty()) {
                 return result;
             }
 

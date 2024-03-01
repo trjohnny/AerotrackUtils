@@ -6,6 +6,7 @@ import com.aerotrack.utils.clients.api.WizzairApiClient;
 import com.aerotrack.utils.clients.api.WizzairApiClient.WizzAirApiService;
 import com.aerotrack.model.entities.TimetableRequest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,5 +61,25 @@ class WizzairApiClientTest {
         Flight flight = result.getFlights().get(0);
         assertEquals("VIE-LON", flight.getDirection(), "Flight direction should match");
         assertEquals(100.0, flight.getPrice(), "Flight price should match");
+    }
+
+    @Test
+    @Disabled("This test makes real API calls and should not be run with the regular test suite.")
+    void getFlightsTest_RealCall() {
+        // Prepare test data
+        String fromAirportCode = "TSF";
+        String toAirportCode = "VCE";
+        LocalDate date = LocalDate.of(2024, 3, 2); // Specific date for testing
+
+        WizzairApiClient realClient = WizzairApiClient.create();
+
+        // Execute the test method
+        FlightList result = realClient.getFlights(fromAirportCode, toAirportCode, date);
+        System.out.println(result.getFlights().toString());
+
+
+        // Assert the result
+        assertNotNull(result, "Result should not be null");
+        assertFalse(result.getFlights().isEmpty(), "Expected to find at least one flight");
     }
 }
