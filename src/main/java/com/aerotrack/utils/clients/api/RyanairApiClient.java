@@ -27,6 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RyanairApiClient {
 
+    private static final String RYANAIR_AIRLINE = "Ryanair";
     private final RyanairApiService ryanairApiService;
     public static RyanairApiClient create() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -162,9 +163,9 @@ public class RyanairApiClient {
 
 
     private FlightList parseFlights(String jsonResponse, String fromAirportCode, String toAirportCode) {
-        FlightList result = new FlightList(new ArrayList<Flight>(), "EUR");
+        FlightList result = new FlightList(new ArrayList<>(), "EUR");
         List<Flight> flights = new ArrayList<>();
-        String currency = "";
+        String currency;
 
         try {
             JSONObject flightDetails = new JSONObject(jsonResponse);
@@ -192,9 +193,8 @@ public class RyanairApiClient {
                 String timeFrom = flight.getJSONArray("timeUTC").getString(0);
                 String timeTo = flight.getJSONArray("timeUTC").getString(1);
                 double price = flight.getJSONObject("regularFare").getJSONArray("fares").getJSONObject(0).getDouble("amount");
-                String flightNumber = flight.getString("flightNumber");
 
-                Flight flightItem = new Flight(fromAirportCode, toAirportCode, timeFrom, timeTo, flightNumber, price);
+                Flight flightItem = new Flight(fromAirportCode, toAirportCode, timeFrom, timeTo, RYANAIR_AIRLINE, price);
                 flights.add(flightItem);
             }
         } catch (NullPointerException | JSONException e) {

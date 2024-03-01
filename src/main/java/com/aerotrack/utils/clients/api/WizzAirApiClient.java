@@ -102,7 +102,7 @@ public class WizzAirApiClient {
                     .direction(flightJson.getString("departureStation") + "-" + flightJson.getString("arrivalStation"))
                     .departureDateTime(departureDateTime)
                     .arrivalDateTime(departureDateTime)
-                    .flightNumber("")
+                    .airline("Wizzair")
                     .price(price)
                     .build();
 

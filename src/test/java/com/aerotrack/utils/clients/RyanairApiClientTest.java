@@ -46,7 +46,7 @@ class RyanairApiClientTest {
         assertFalse(flights.isEmpty());
 
         Flight firstFlight = flights.get(0);
-        assertEquals("FR123", firstFlight.getFlightNumber());
+        assertEquals("Ryanair", firstFlight.getAirline());
         assertEquals(100.0, firstFlight.getPrice());
     }
 
@@ -55,7 +55,7 @@ class RyanairApiClientTest {
         when(mockApiService.getFlights(any(), any(), any(), any(), any(), any(), any())).thenReturn(mockCall);
         when(mockCall.execute()).thenThrow(new RuntimeException("API request failed"));
 
-        Exception exception = assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
                 ryanairApiClient.getFlights("OriginCode", "DestinationCode", LocalDate.of(2023, 1, 1))
         );
     }
