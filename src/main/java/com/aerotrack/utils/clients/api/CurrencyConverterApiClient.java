@@ -34,7 +34,7 @@ public class CurrencyConverterApiClient {
             Response<String> response = currencyApiService.getCurrencyRate(currencyFrom.toLowerCase()).execute();
 
             // Log full request URL
-            System.out.println("Requested URL: " + response.raw().request().url().toString());
+            log.info("Requested URL: " + response.raw().request().url());
 
             if (response.isSuccessful() && response.body() != null) {
 

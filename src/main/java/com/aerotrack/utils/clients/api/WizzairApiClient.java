@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import retrofit2.Response;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -106,7 +105,7 @@ public class WizzairApiClient implements AirlineApiClient{
         JSONObject json = new JSONObject(jsonResponse);
         JSONArray outboundFlights = json.getJSONArray("outboundFlights");
         List<Flight> flights = new ArrayList<>();
-        String currency = "";
+        String currency = "eur";
 
         for (int i = 0; i < outboundFlights.length(); i++) {
             JSONObject flightJson = outboundFlights.getJSONObject(i);
