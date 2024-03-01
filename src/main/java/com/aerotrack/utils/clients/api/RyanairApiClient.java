@@ -25,7 +25,7 @@ import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
-public class RyanairApiClient {
+public class RyanairApiClient implements AirlineApiClient{
 
     private static final String RYANAIR_AIRLINE = "Ryanair";
     private final RyanairApiService ryanairApiService;

@@ -22,7 +22,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
 @Slf4j
-public class WizzairApiClient {
+public class WizzairApiClient implements AirlineApiClient{
     private final WizzAirApiService wizzAirApiService;
 
     public WizzairApiClient(WizzAirApiService wizzAirApiService) {
