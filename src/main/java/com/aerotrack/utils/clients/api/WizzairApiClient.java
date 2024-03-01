@@ -22,21 +22,21 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
 @Slf4j
-public class WizzAirApiClient {
+public class WizzairApiClient {
     private final WizzAirApiService wizzAirApiService;
 
-    public WizzAirApiClient(WizzAirApiService wizzAirApiService) {
+    public WizzairApiClient(WizzAirApiService wizzAirApiService) {
         this.wizzAirApiService = wizzAirApiService;
     }
 
-    public static WizzAirApiClient create() {
+    public static WizzairApiClient create() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://be.wizzair.com/") // Adjust the base URL
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        return new WizzAirApiClient(retrofit.create(WizzAirApiService.class));
+        return new WizzairApiClient(retrofit.create(WizzAirApiService.class));
     }
 
     public FlightList getFlights(String fromAirportCode, String toAirportCode, LocalDate date) {

@@ -2,8 +2,8 @@ package com.aerotrack.utils.clients;
 
 import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.FlightList;
-import com.aerotrack.utils.clients.api.WizzAirApiClient;
-import com.aerotrack.utils.clients.api.WizzAirApiClient.WizzAirApiService;
+import com.aerotrack.utils.clients.api.WizzairApiClient;
+import com.aerotrack.utils.clients.api.WizzairApiClient.WizzAirApiService;
 import com.aerotrack.model.entities.TimetableRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class WizzAirApiClientTest {
+class WizzairApiClientTest {
 
     @Mock
     private WizzAirApiService mockApiService;
@@ -27,7 +27,7 @@ class WizzAirApiClientTest {
     @Mock
     private Call<String> mockCall;
 
-    private WizzAirApiClient client;
+    private WizzairApiClient client;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -38,7 +38,7 @@ class WizzAirApiClientTest {
         when(mockCall.execute()).thenReturn(Response.success("{\"outboundFlights\":[{\"departureStation\":\"VIE\",\"arrivalStation\":\"LON\",\"departureDate\":\"2024-03-02T00:00:00\",\"price\":{\"amount\":100.0,\"currencyCode\":\"EUR\"},\"departureDates\":[\"2024-03-02T06:00:00\"]}]}"));
 
         // Create the client instance with the mocked API service
-        client = new WizzAirApiClient(mockApiService);
+        client = new WizzairApiClient(mockApiService);
     }
 
     @Test
