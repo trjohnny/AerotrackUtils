@@ -6,6 +6,7 @@ import com.aerotrack.model.entities.Flight;
 import com.aerotrack.model.entities.FlightList;
 import com.aerotrack.model.exceptions.DirectionNotAvailableException;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -72,12 +73,13 @@ public class WizzairApiClient implements AirlineApiClient{
 
             if (!response.isSuccessful() && response.errorBody() != null) {
                 String errorBody = response.errorBody().string();
+                log.error("URL: " + response.raw().request().url());
+                log.error("Error body: " + errorBody);
                 JSONObject json = new JSONObject(errorBody);
                 JSONArray validationCodes = json.getJSONArray("validationCodes");
                 String reason = validationCodes.getString(0);
 
                 if (! reason.equals("InvalidMarket")) {
-                    log.error("Error body: " + errorBody);
                     throw new RuntimeException("Unsuccessful response from WizzAir API.");
                 }
 
@@ -98,6 +100,9 @@ public class WizzairApiClient implements AirlineApiClient{
         } catch (IOException e) {
             log.error("IOException caught while calling WizzAir API: " + e.getMessage());
             throw new RuntimeException("IOException caught while calling WizzAir API.", e);
+        } catch (JSONException exc) {
+            log.error("JSONException caught while calling WizzAir API: " + exc.getMessage());
+            throw new RuntimeException("IOException caught while calling WizzAir API.", exc);
         }
     }
 
@@ -139,7 +144,7 @@ public class WizzairApiClient implements AirlineApiClient{
                 "referer: https://wizzair.com/en-gb/flights/timetable",
                 "accept-language: en-GB,en;q=0.9,hu-HU;q=0.8,hu;q=0.7,en-US;q=0.6"
         })
-        @POST("20.6.0/Api/search/timetable")
+        @POST("20.7.0/Api/search/timetable")
         Call<String> getTimetable(@Body TimetableRequest requestBody);
     }
 }
