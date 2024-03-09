@@ -113,13 +113,13 @@ public class WizzairApiClient implements AirlineApiClient{
             double price = flightJson.getJSONObject("price").getDouble("amount");
             currency = flightJson.getJSONObject("price").getString("currencyCode").toLowerCase();
 
-            Flight flight = Flight.builder()
-                    .direction(flightJson.getString("departureStation") + "-" + flightJson.getString("arrivalStation"))
-                    .departureDateTime(departureDateTime)
-                    .arrivalDateTime(departureDateTime)
-                    .airline("Wizzair")
-                    .price(price)
-                    .build();
+            Flight flight = new Flight(flightJson.getString("departureStation"),
+                    flightJson.getString("arrivalStation"),
+                    departureDateTime,
+                    departureDateTime,
+                    "Wizzair",
+                    price
+            );
 
             flights.add(flight);
         }
