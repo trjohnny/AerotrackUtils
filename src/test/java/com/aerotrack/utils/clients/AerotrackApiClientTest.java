@@ -16,7 +16,9 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,11 +78,13 @@ class AerotrackApiClientTest {
         Airport venice = new Airport("VCE","Venice Marco Polo","IT",List.of("AHO","BRI","BER","CGN","DUB","HEL"),"2023-12-10T00:00:00.000Z");
         Airport vienna = new Airport("VIE", "Vienna", "AT", List.of("VCE","TSF","BRI"),"2023-12-10T00:00:00.000Z");
         Airport praga = new Airport("PRG","Praga","CK",List.of("TSF"),"2023-12-10T00:00:00.000");
-        List<Airport> testAirports = List.of(venice, vienna, praga);
+        Set<Airport> testAirports = new HashSet<>(List.of(venice, vienna, praga));
+        testAirports.addAll(testAirports);
 
         AirportsJsonFile airportsJsonFile = new AirportsJsonFile(testAirports);
 
-        when(mockApiGatewayService.sendAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
+        when(mockApiGatewayService.sendRyanairAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
+        when(mockApiGatewayService.sendWizzairAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
         when(mockJsonCall.execute()).thenReturn(Response.success(airportsJsonFile));
 
         AirportsJsonFile result = aerotrackApiClient.getAirportsJson();

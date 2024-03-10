@@ -1,6 +1,7 @@
 package com.aerotrack.utils.clients.api;
 
 import com.aerotrack.model.entities.AerotrackStage;
+import com.aerotrack.model.entities.Airport;
 import com.aerotrack.model.entities.AirportsJsonFile;
 import com.aerotrack.model.entities.Trip;
 import com.aerotrack.model.exceptions.AerotrackClientException;
@@ -17,7 +18,9 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -47,6 +50,7 @@ public class AerotrackApiClient {
 
     public List<Trip> getBestFlight(ScanQueryRequest scanQueryRequest) {
         try {
+            System.out.println("Endpoint: " + stage.getApiEndpoint().baseUrl());
             ScanQueryResponse response = apiGatewayService.sendScanQueryRequest(stage.getApiEndpoint().apiKey(), scanQueryRequest)
                     .execute()
                     .body();
@@ -61,26 +65,38 @@ public class AerotrackApiClient {
         throw new RuntimeException("Response is null");
     }
 
-    public AirportsJsonFile getAirportsJson(){
+    public AirportsJsonFile getAirportsJson() {
         try {
-            AirportsJsonFile response = apiGatewayService.sendAirportsJSONRequest(stage.getApiEndpoint().apiKey())
-                    .execute()
-                    .body();
+            AirportsJsonFile ryanairAirports = apiGatewayService.sendRyanairAirportsJSONRequest(stage.getApiEndpoint().apiKey()).execute().body();
+            AirportsJsonFile wizzairAirports = apiGatewayService.sendWizzairAirportsJSONRequest(stage.getApiEndpoint().apiKey()).execute().body();
 
-            if (response != null){
-                return response;
+            // Merge both airport lists, ensuring no duplicates
+            Set<Airport> mergedAirports = new HashSet<>();
+            if (ryanairAirports != null) {
+                mergedAirports.addAll(ryanairAirports.getAirports());
             }
+            if (wizzairAirports != null) {
+                mergedAirports.addAll(wizzairAirports.getAirports());
+            }
+
+            return new AirportsJsonFile(new HashSet<>(mergedAirports));
+
         } catch (IOException e) {
             log.error("Error in API request: " + e.getMessage());
             throw new AerotrackClientException("Error in API request: ", e);
+        } catch (Exception e) {
+            log.error("Error when calling getAirportsJson: " + e.getMessage());
+            throw new AerotrackClientException("Error when calling getAirportsJson: ", e);
         }
-        throw new RuntimeException("Response is null");
     }
 
     public interface ApiGatewayService {
-        @GET("airports")
-        retrofit2.Call<AirportsJsonFile> sendAirportsJSONRequest(@Header("x-api-key") String apiKey);
+        @GET("airports/ryanair")
+        retrofit2.Call<AirportsJsonFile> sendRyanairAirportsJSONRequest(@Header("x-api-key") String apiKey);
+        @GET("airports/wizzair")
+        retrofit2.Call<AirportsJsonFile> sendWizzairAirportsJSONRequest(@Header("x-api-key") String apiKey);
         @POST("scan")
         retrofit2.Call<ScanQueryResponse> sendScanQueryRequest(@Header("x-api-key") String apiKey, @Body ScanQueryRequest request);
     }
+
 }

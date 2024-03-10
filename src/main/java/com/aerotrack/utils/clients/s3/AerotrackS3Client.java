@@ -1,6 +1,9 @@
 package com.aerotrack.utils.clients.s3;
 
 import com.aerotrack.common.Constants;
+import com.aerotrack.model.entities.Airport;
+import com.aerotrack.model.entities.AirportsJsonFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -12,10 +15,14 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 public class AerotrackS3Client {
     S3Client s3Client;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // Make sure to have Jackson's ObjectMapper.
+
     public static AerotrackS3Client create() {
         return new AerotrackS3Client(S3Client.create());
     }
@@ -45,5 +52,36 @@ public class AerotrackS3Client {
         RequestBody requestBody = RequestBody.fromString(object.toString());
 
         s3Client.putObject(putObjectRequest, requestBody);
+    }
+
+    private AirportsJsonFile getAirportsJsonFile(String objectKey) throws IOException {
+        String jsonContent = getStringObjectFromS3(objectKey);
+        return objectMapper.readValue(jsonContent, AirportsJsonFile.class);
+    }
+
+    public AirportsJsonFile getRyanairAirports() throws IOException {
+        return getAirportsJsonFile(Constants.RYANAIR_AIRPORTS_OBJECT_NAME);
+    }
+
+    public AirportsJsonFile getWizzairAirports() throws IOException {
+        return getAirportsJsonFile(Constants.WIZZAIR_AIRPORTS_OBJECT_NAME);
+    }
+
+    public AirportsJsonFile getMergedAirports() throws IOException {
+        AirportsJsonFile ryanairAirports = getRyanairAirports();
+        AirportsJsonFile wizzairAirports = getWizzairAirports();
+
+        Set<Airport> mergedSet = new HashSet<>(ryanairAirports.getAirports());
+        for (Airport wizzairAirport : wizzairAirports.getAirports()) {
+            if (mergedSet.contains(wizzairAirport)) {
+                mergedSet.stream()
+                        .filter(airport -> airport.equals(wizzairAirport))
+                        .findFirst()
+                        .ifPresent(airport -> airport.getConnections().addAll(wizzairAirport.getConnections()));
+            } else {
+                mergedSet.add(wizzairAirport);
+            }
+        }
+        return new AirportsJsonFile(mergedSet);
     }
 }
