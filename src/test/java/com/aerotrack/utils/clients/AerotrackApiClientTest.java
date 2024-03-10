@@ -83,11 +83,10 @@ class AerotrackApiClientTest {
 
         AirportsJsonFile airportsJsonFile = new AirportsJsonFile(testAirports);
 
-        when(mockApiGatewayService.sendRyanairAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
-        when(mockApiGatewayService.sendWizzairAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
+        when(mockApiGatewayService.sendMergedAirportsJSONRequest(anyString())).thenReturn(mockJsonCall);
         when(mockJsonCall.execute()).thenReturn(Response.success(airportsJsonFile));
 
-        AirportsJsonFile result = aerotrackApiClient.getAirportsJson();
+        AirportsJsonFile result = aerotrackApiClient.getMergetAirportsJson();
 
         assertEquals(result, airportsJsonFile);
     }

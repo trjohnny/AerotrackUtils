@@ -65,22 +65,9 @@ public class AerotrackApiClient {
         throw new RuntimeException("Response is null");
     }
 
-    public AirportsJsonFile getAirportsJson() {
+    public AirportsJsonFile getMergetAirportsJson() {
         try {
-            AirportsJsonFile ryanairAirports = apiGatewayService.sendRyanairAirportsJSONRequest(stage.getApiEndpoint().apiKey()).execute().body();
-            AirportsJsonFile wizzairAirports = apiGatewayService.sendWizzairAirportsJSONRequest(stage.getApiEndpoint().apiKey()).execute().body();
-
-            // Merge both airport lists, ensuring no duplicates
-            Set<Airport> mergedAirports = new HashSet<>();
-            if (ryanairAirports != null) {
-                mergedAirports.addAll(ryanairAirports.getAirports());
-            }
-            if (wizzairAirports != null) {
-                mergedAirports.addAll(wizzairAirports.getAirports());
-            }
-
-            return new AirportsJsonFile(new HashSet<>(mergedAirports));
-
+            return apiGatewayService.sendMergedAirportsJSONRequest(stage.getApiEndpoint().apiKey()).execute().body();
         } catch (IOException e) {
             log.error("Error in API request: " + e.getMessage());
             throw new AerotrackClientException("Error in API request: ", e);
@@ -95,6 +82,8 @@ public class AerotrackApiClient {
         retrofit2.Call<AirportsJsonFile> sendRyanairAirportsJSONRequest(@Header("x-api-key") String apiKey);
         @GET("airports/wizzair")
         retrofit2.Call<AirportsJsonFile> sendWizzairAirportsJSONRequest(@Header("x-api-key") String apiKey);
+        @GET("airports/merged")
+        retrofit2.Call<AirportsJsonFile> sendMergedAirportsJSONRequest(@Header("x-api-key") String apiKey);
         @POST("scan")
         retrofit2.Call<ScanQueryResponse> sendScanQueryRequest(@Header("x-api-key") String apiKey, @Body ScanQueryRequest request);
     }
